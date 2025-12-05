@@ -1,20 +1,2 @@
-# cyberlog
-<<<<<<< HEAD
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
- A personal Flutter learning playground where I experiment with mobile app development concepts, sample projects, and practice code. This repo  stores notes, demos, and iterations as I progress from basics to more advanced app development topics.
->>>>>>> e5bdae277b7d9e43f263f4103fdfddc47f091137
+# SESSION 2
+Dart's compilation process utilizes both Just-in-Time (JIT) compilation during development for fast iteration (like Hot Reload) and Ahead-of-Time (AOT) compilation for the final release app to ensure peak performance and speed. The core logic of the Ccurrent app, checking if the summed ASCII value of a string is even or odd, uses a concise Ternary Conditional Operator (String parity = number % 2 == 0 ? 'even' : 'odd';). This short syntax checks if the remainder of the number divided by 2 is zero. to present a  clean, understandable result, String Interpolation is used. Instead of messy concatenation, variables ($input, $number, and $parity) are embedded directly into the final output string, making the result text highly readable and easy to construct.

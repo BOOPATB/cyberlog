@@ -4,7 +4,7 @@ void main() {
   runApp(const CyberLogApp());
 }
 
-// Log class to structure data
+
 class Log {
   final String action;
   final DateTime timestamp;
@@ -22,7 +22,6 @@ class CyberLogApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Sample list of logs
     final List<Log> logs = [
       Log('App started', DateTime.now().subtract(const Duration(minutes: 10)), 'success'),
       Log('User logged in', DateTime.now().subtract(const Duration(minutes: 5)), 'success'),
@@ -39,7 +38,6 @@ class CyberLogApp extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            // Convert each Log into a Text widget via list iteration
             children: logs
                 .map(
                   (log) => Padding(

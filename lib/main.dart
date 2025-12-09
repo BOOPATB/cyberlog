@@ -1,81 +1,56 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const StringToAsciiApp());
+  runApp(const CyberLogApp());
 }
 
-class StringToAsciiApp extends StatefulWidget {
-  const StringToAsciiApp({super.key});
+// Log class to structure data
+class Log {
+  final String action;
+  final DateTime timestamp;
+  final String status;
 
-  @override
-  State<StringToAsciiApp> createState() => _StringToAsciiAppState();
+  Log(this.action, this.timestamp, this.status);
+
+  String formatted() {
+    return '$action at ${timestamp.toLocal()} (status: $status)';
+  }
 }
 
-class _StringToAsciiAppState extends State<StringToAsciiApp> {
-  final TextEditingController _controller = TextEditingController();
-  String _output = '';
-
-  // Convert a string like "PARTH" to a number by summing character codes
-  int _stringToNumber(String input) {
-    int sum = 0;
-    for (int i = 0; i < input.length; i++) {
-      sum += input.codeUnitAt(i); // ASCII/UTF‑16 code of each character
-    }
-    return sum;
-  }
-
-  void _convertAndCheck() {
-    String input = _controller.text.trim();
-
-    if (input.isEmpty) {
-      setState(() {
-        _output = 'Please enter a non‑empty string.';
-      });
-      return;
-    }
-
-    int number = _stringToNumber(input);
-    String parity = number % 2 == 0 ? 'even' : 'odd';
-
-    setState(() {
-      _output =
-      'String: "$input"\nNumber value: $number\nThe number $number is $parity.';
-    });
-  }
+class CyberLogApp extends StatelessWidget {
+  const CyberLogApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Sample list of logs
+    final List<Log> logs = [
+      Log('App started', DateTime.now().subtract(const Duration(minutes: 10)), 'success'),
+      Log('User logged in', DateTime.now().subtract(const Duration(minutes: 5)), 'success'),
+      Log('API call: /check-status', DateTime.now().subtract(const Duration(minutes: 2)), 'pending'),
+      Log('Error loading profile', DateTime.now(), 'error'),
+    ];
+
     return MaterialApp(
-      title: 'String → Number ',
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('String to Number Checker'),
+          title: const Text('Cyberlog – Logs Demo'),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text('Enter any string (e.g. DUDUDU):'),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _controller,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'MAX VERSTAPPEN',
+            crossAxisAlignment: CrossAxisAlignment.start,
+            // Convert each Log into a Text widget via list iteration
+            children: logs
+                .map(
+                  (log) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Text(
+                  log.formatted(),
+                  style: const TextStyle(fontSize: 14),
                 ),
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _convertAndCheck,
-                child: const Text('Convert & Check'),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _output,
-                style: const TextStyle(fontSize: 18),
-              ),
-            ],
+            )
+                .toList(),
           ),
         ),
       ),

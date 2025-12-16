@@ -1,20 +1,6 @@
-# cyberlog
-<<<<<<< HEAD
+# session 5
 
-A new Flutter project.
+Session 5 teaches core Flutter layout skills: how parents give constraints and children size/position themselves, using Column and Row for vertical and horizontal structure, Container and Padding for styling and spacing, and ListView/GridView for scrollable and multi-column UIs. It then applies these to build a data-driven dashboard screen using a GridView of decorated cards, showing how simple lists of data can generate professional, responsive layouts.
 
-## Getting Started
+<img width="293" height="357" alt="image" src="https://github.com/user-attachments/assets/b9dbe424-693e-4b48-9dbe-170d5c4ace76" />
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
- A personal Flutter learning playground where I experiment with mobile app development concepts, sample projects, and practice code. This repo  stores notes, demos, and iterations as I progress from basics to more advanced app development topics.
->>>>>>> e5bdae277b7d9e43f263f4103fdfddc47f091137

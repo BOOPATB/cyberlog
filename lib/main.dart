@@ -1,136 +1,261 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const DashboardApp());
+// ---------- Custom slide route ----------
+Route createSlideRoute(Widget page) {
+  return PageRouteBuilder(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(1.0, 0.0); // from right
+      const end = Offset.zero;
+      const curve = Curves.easeInOut;
+
+      final tween = Tween(begin: begin, end: end).chain(
+        CurveTween(curve: curve),
+      );
+
+      return SlideTransition(
+        position: animation.drive(tween),
+        child: child,
+      );
+    },
+  );
 }
 
-class DashboardApp extends StatelessWidget {
-  const DashboardApp({super.key});
+void main() {
+  runApp(const MyApp());
+}
+
+// ---------- App + Bottom Navigation Root ----------
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Cyberlog Dashboard'),
+      debugShowCheckedModeBanner: false,
+      title: 'Bottom Nav + Custom Routes',
+      theme: ThemeData(
+        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.teal,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0,
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Quick Actions',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-
-              // 2-column GridView with 4 placeholder cards
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,          // two columns
-                  mainAxisSpacing: 12,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 4 / 3,    // tweak height
-                  children: const [
-                    _DashboardCard(
-                      title: 'Daily Log',
-                      icon: Icons.today,
-                      bgColor: Color(0xFFE3F2FD),  // light blue
-                      iconColor: Color(0xFF1976D2),
-                    ),
-                    _DashboardCard(
-                      title: 'Cyber Tips',
-                      icon: Icons.shield_outlined,
-                      bgColor: Color(0xFFE8F5E9),  // light green
-                      iconColor: Color(0xFF2E7D32),
-                    ),
-                    _DashboardCard(
-                      title: 'Device Security',
-                      icon: Icons.security,
-                      bgColor: Color(0xFFFFF3E0),  // light orange
-                      iconColor: Color(0xFFF57C00),
-                    ),
-                    _DashboardCard(
-                      title: 'Notes',
-                      icon: Icons.note_alt_outlined,
-                      bgColor: Color(0xFFF3E5F5),  // light purple
-                      iconColor: Color(0xFF7B1FA2),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.teal,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
           ),
         ),
       ),
+      home: const RootScreen(),
     );
   }
 }
 
-// Reusable card widget with Container + BoxDecoration
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color bgColor;
-  final Color iconColor;
+class RootScreen extends StatefulWidget {
+  const RootScreen({super.key});
 
-  const _DashboardCard({
-    required this.title,
-    required this.icon,
-    required this.bgColor,
-    required this.iconColor,
-  });
+  @override
+  State<RootScreen> createState() => _RootScreenState();
+}
+
+class _RootScreenState extends State<RootScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = const [
+    HomePage(),
+    LogsPage(),
+    SettingsPage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(16), // smooth corners
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
+    String title;
+    switch (_currentIndex) {
+      case 0:
+        title = 'Home';
+        break;
+      case 1:
+        title = 'Logs';
+        break;
+      default:
+        title = 'Settings';
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(title)),
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        showUnselectedLabels: true,
+        items: [
+          _animatedBarItem(icon: Icons.home, label: 'Home', index: 0),
+          _animatedBarItem(icon: Icons.list_alt, label: 'Logs', index: 1),
+          _animatedBarItem(icon: Icons.settings, label: 'Settings', index: 2),
         ],
       ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: iconColor,
-              size: 24,
-            ),
+    );
+  }
+
+  // Animated BottomNavigationBarItem helper
+  BottomNavigationBarItem _animatedBarItem({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    final bool selected = _currentIndex == index;
+
+    return BottomNavigationBarItem(
+      label: label,
+      icon: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.all(4),
+        child: Transform.scale(
+          scale: selected ? 1.2 : 1.0, // zoom selected icon a bit
+          child: Icon(
+            icon,
+            color: selected ? Colors.teal : Colors.grey,
           ),
-          const Spacer(),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'View details',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.black54,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
+// ---------- Tab pages ----------
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            createSlideRoute(const ScreenA()),
+          );
+        },
+        child: const Text('Go to Screen A flow'),
+      ),
+    );
+  }
+}
+
+class LogsPage extends StatelessWidget {
+  const LogsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Logs page content here'),
+    );
+  }
+}
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Settings page content here'),
+    );
+  }
+}
+
+// ---------- Original screens with slide navigation ----------
+
+class ScreenA extends StatelessWidget {
+  const ScreenA({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('ScreenA')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('this is screen A'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  createSlideRoute(const ScreenB()),
+                );
+              },
+              child: const Text('go to screenB'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ScreenB extends StatelessWidget {
+  const ScreenB({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('ScreenB')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('this is screen b'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  createSlideRoute(const ScreenC()),
+                );
+              },
+              child: const Text('go to screenC'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ScreenC extends StatelessWidget {
+  const ScreenC({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('ScreenC')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('this is screen C'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('back to pavilion'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

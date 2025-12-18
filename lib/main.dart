@@ -1,62 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-// ---------- Custom slide route ----------
+// ================== PROVIDERS ==================
+
+class LogProvider extends ChangeNotifier {
+  final List<String> _logs = [];
+  List<String> get logs => List.unmodifiable(_logs);
+
+  void addLog(String message) {
+    final timestamp = DateTime.now().toString().split('.').first;
+    _logs.insert(0, '[$timestamp] $message');
+    notifyListeners();
+  }
+}
+
+class SettingsProvider extends ChangeNotifier {
+  bool _isDarkMode = false;
+  bool get isDarkMode => _isDarkMode;
+
+  void toggleTheme() {
+    _isDarkMode = !_isDarkMode;
+    notifyListeners();
+  }
+}
+
+// ================== CUSTOM ROUTE ==================
+
 Route createSlideRoute(Widget page) {
   return PageRouteBuilder(
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0); // from right
+      const begin = Offset(1.0, 0.0);
       const end = Offset.zero;
       const curve = Curves.easeInOut;
-
-      final tween = Tween(begin: begin, end: end).chain(
-        CurveTween(curve: curve),
-      );
-
-      return SlideTransition(
-        position: animation.drive(tween),
-        child: child,
-      );
+      final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      return SlideTransition(position: animation.drive(tween), child: child);
     },
   );
 }
 
+// ================== MAIN APP ==================
+
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LogProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
-// ---------- App + Bottom Navigation Root ----------
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsProvider>();
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Bottom Nav + Custom Routes',
+      title: 'Provider Nav App',
       theme: ThemeData(
-        scaffoldBackgroundColor: const Color(0xFFF5F5F7),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.teal,
-          foregroundColor: Colors.white,
-          centerTitle: true,
-          elevation: 0,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.teal,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-          ),
-        ),
+        brightness: settings.isDarkMode ? Brightness.dark : Brightness.light,
+        // FIXED: Corrected hex code from 0密 to 0xFF
+        scaffoldBackgroundColor: settings.isDarkMode ? const Color(0xFF121212) : const Color(0xFFF5F5F7),
+        colorSchemeSeed: Colors.teal,
+        useMaterial3: true,
       ),
       home: const RootScreen(),
     );
   }
 }
+
+// ================== ROOT SCREEN ==================
 
 class RootScreen extends StatefulWidget {
   const RootScreen({super.key});
@@ -76,65 +95,36 @@ class _RootScreenState extends State<RootScreen> {
 
   @override
   Widget build(BuildContext context) {
-    String title;
-    switch (_currentIndex) {
-      case 0:
-        title = 'Home';
-        break;
-      case 1:
-        title = 'Logs';
-        break;
-      default:
-        title = 'Settings';
-    }
+    final titles = ['Home', 'Activity Logs', 'Settings'];
 
     return Scaffold(
-      appBar: AppBar(title: Text(title)),
+      appBar: AppBar(title: Text(titles[_currentIndex])),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        showUnselectedLabels: true,
+        onTap: (index) => setState(() => _currentIndex = index),
         items: [
           _animatedBarItem(icon: Icons.home, label: 'Home', index: 0),
-          _animatedBarItem(icon: Icons.list_alt, label: 'Logs', index: 1),
+          _animatedBarItem(icon: Icons.history, label: 'Logs', index: 1),
           _animatedBarItem(icon: Icons.settings, label: 'Settings', index: 2),
         ],
       ),
     );
   }
 
-  // Animated BottomNavigationBarItem helper
-  BottomNavigationBarItem _animatedBarItem({
-    required IconData icon,
-    required String label,
-    required int index,
-  }) {
+  BottomNavigationBarItem _animatedBarItem({required IconData icon, required String label, required int index}) {
     final bool selected = _currentIndex == index;
-
     return BottomNavigationBarItem(
       label: label,
-      icon: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.all(4),
-        child: Transform.scale(
-          scale: selected ? 1.2 : 1.0, // zoom selected icon a bit
-          child: Icon(
-            icon,
-            color: selected ? Colors.teal : Colors.grey,
-          ),
-        ),
+      icon: Transform.scale(
+        scale: selected ? 1.2 : 1.0,
+        child: Icon(icon, color: selected ? Colors.teal : Colors.grey),
       ),
     );
   }
 }
 
-// ---------- Tab pages ----------
+// ================== TAB PAGES ==================
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -142,13 +132,13 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
+        icon: const Icon(Icons.play_arrow),
+        label: const Text('Start Navigation Flow'),
         onPressed: () {
-          Navigator.of(context).push(
-            createSlideRoute(const ScreenA()),
-          );
+          context.read<LogProvider>().addLog("Started Flow: Entered Screen A");
+          Navigator.of(context).push(createSlideRoute(const ScreenA()));
         },
-        child: const Text('Go to Screen A flow'),
       ),
     );
   }
@@ -159,8 +149,18 @@ class LogsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Logs page content here'),
+    final logProvider = context.watch<LogProvider>();
+
+    return logProvider.logs.isEmpty
+        ? const Center(child: Text("No activity logged yet."))
+        : ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: logProvider.logs.length,
+      separatorBuilder: (_, __) => const Divider(),
+      itemBuilder: (context, index) => Text(
+        logProvider.logs[index],
+        style: const TextStyle(fontFamily: 'monospace'),
+      ),
     );
   }
 }
@@ -170,36 +170,37 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Settings page content here'),
+    final settings = context.watch<SettingsProvider>();
+
+    return ListView(
+      children: [
+        SwitchListTile(
+          title: const Text("Dark Mode"),
+          subtitle: const Text("Switch between light and dark themes"),
+          secondary: const Icon(Icons.palette),
+          value: settings.isDarkMode,
+          onChanged: (val) => settings.toggleTheme(),
+        ),
+      ],
     );
   }
 }
 
-// ---------- Original screens with slide navigation ----------
+// ================== SLIDE SCREENS ==================
 
 class ScreenA extends StatelessWidget {
   const ScreenA({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ScreenA')),
+      appBar: AppBar(title: const Text('Screen A')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('this is screen A'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  createSlideRoute(const ScreenB()),
-                );
-              },
-              child: const Text('go to screenB'),
-            ),
-          ],
+        child: ElevatedButton(
+          child: const Text('Go to Screen B'),
+          onPressed: () {
+            context.read<LogProvider>().addLog("Navigated to Screen B");
+            Navigator.of(context).push(createSlideRoute(const ScreenB()));
+          },
         ),
       ),
     );
@@ -208,26 +209,17 @@ class ScreenA extends StatelessWidget {
 
 class ScreenB extends StatelessWidget {
   const ScreenB({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ScreenB')),
+      appBar: AppBar(title: const Text('Screen B')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('this is screen b'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  createSlideRoute(const ScreenC()),
-                );
-              },
-              child: const Text('go to screenC'),
-            ),
-          ],
+        child: ElevatedButton(
+          child: const Text('Go to Screen C'),
+          onPressed: () {
+            context.read<LogProvider>().addLog("Navigated to Screen C");
+            Navigator.of(context).push(createSlideRoute(const ScreenC()));
+          },
         ),
       ),
     );
@@ -236,24 +228,17 @@ class ScreenB extends StatelessWidget {
 
 class ScreenC extends StatelessWidget {
   const ScreenC({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('ScreenC')),
+      appBar: AppBar(title: const Text('Screen C')),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('this is screen C'),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('back to pavilion'),
-            ),
-          ],
+        child: ElevatedButton(
+          child: const Text('Finish and Back'),
+          onPressed: () {
+            context.read<LogProvider>().addLog("Completed Flow: Returned to Home");
+            Navigator.pop(context);
+          },
         ),
       ),
     );

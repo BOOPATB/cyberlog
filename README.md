@@ -9,4 +9,9 @@ Session 5 teaches core Flutter layout skills: how parents give constraints and c
 Push/pop navigation with a Navigator stack for multi‑screen flows.
 A BottomNavigationBar with currentIndex and screens[currentIndex] for instant tab switching.
 Named routes plus a custom slide transition for cleaner, reusable navigation between screens
-<img width="291" height="641" alt="image" src="https://github.com/user-attachments/assets/15e42d66-a0f9-4343-bf1b-132f2da21caa" />
+<img width="291" height="400" alt="image" src="https://github.com/user-attachments/assets/15e42d66-a0f9-4343-bf1b-132f2da21caa" />
+
+#session 7
+This session explains that state is the app's "memory," representing any data that changes during runtime. While setState() handles simple local updates, it fails to scale because it keeps data trapped within a single widget. Provider is introduced as the professional alternative, using a ChangeNotifier to store state externally and notifyListeners() to refresh the UI globally. This approach ensures a cleaner architecture by separating business logic from the UI and allowing data to be shared easily across multiple screens.
+<img width="274" height="602" alt="image" src="https://github.com/user-attachments/assets/e4441d5f-02c7-4f07-8d38-48dfa75b0bc3" />
+<img width="271" height="599" alt="image" src="https://github.com/user-attachments/assets/66a11c18-2c23-43fe-bb40-1ffcdc2899c8" />

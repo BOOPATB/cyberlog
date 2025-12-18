@@ -13,5 +13,6 @@ Named routes plus a custom slide transition for cleaner, reusable navigation bet
 
 #session 7
 This session explains that state is the app's "memory," representing any data that changes during runtime. While setState() handles simple local updates, it fails to scale because it keeps data trapped within a single widget. Provider is introduced as the professional alternative, using a ChangeNotifier to store state externally and notifyListeners() to refresh the UI globally. This approach ensures a cleaner architecture by separating business logic from the UI and allowing data to be shared easily across multiple screens.
-<img width="274" height="602" alt="image" src="https://github.com/user-attachments/assets/e4441d5f-02c7-4f07-8d38-48dfa75b0bc3" />
-<img width="271" height="599" alt="image" src="https://github.com/user-attachments/assets/66a11c18-2c23-43fe-bb40-1ffcdc2899c8" />
+
+<img width="280" height="600" alt="image" src="https://github.com/user-attachments/assets/e4441d5f-02c7-4f07-8d38-48dfa75b0bc3" />
+<img width="280" height="600" alt="image" src="https://github.com/user-attachments/assets/66a11c18-2c23-43fe-bb40-1ffcdc2899c8" />

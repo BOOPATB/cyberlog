@@ -16,3 +16,9 @@ This session explains that state is the app's "memory," representing any data th
 
 <img width="280" height="600" alt="image" src="https://github.com/user-attachments/assets/e4441d5f-02c7-4f07-8d38-48dfa75b0bc3" />
 <img width="280" height="600" alt="image" src="https://github.com/user-attachments/assets/66a11c18-2c23-43fe-bb40-1ffcdc2899c8" />
+
+I learned that modern apps rely on APIs (Application Programming Interfaces) to act as a bridge between the Client (our Flutter app) and the Server (where data lives), using the HTTP protocol to send requests and receive responses. By utilizing the http package, we can perform GET requests to fetch data in JSON format, which is then decoded into a Dart Map and displayed on the screen. A key takeaway is the importance of using Model Classes to transform raw JSON into structured Dart objects
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/78349709-0df4-423f-aa3e-6c97e334f57c" width="300" alt="App Screenshot">
+</div>

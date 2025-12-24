@@ -23,7 +23,8 @@ I learned that modern apps rely on APIs (Application Programming Interfaces) to 
   <img src="https://github.com/user-attachments/assets/78349709-0df4-423f-aa3e-6c97e334f57c" width="300" alt="App Screenshot">
 </div>
 
-#session9
+#session 9
+
 <div align="center">
   <img src="https://github.com/user-attachments/assets/c7deede7-0eff-4c04-b563-cc330b6ae655" width="300" alt="CyberLog App Dashboard">
   <p><i>The CyberLog Dashboard featuring Daily Tips and Navigation Flow</i></p>

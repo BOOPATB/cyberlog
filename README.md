@@ -24,4 +24,7 @@ I learned that modern apps rely on APIs (Application Programming Interfaces) to 
 </div>
 
 #session9
-<img width="289" height="643" alt="image" src="https://github.com/user-attachments/assets/c7deede7-0eff-4c04-b563-cc330b6ae655" />
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/c7deede7-0eff-4c04-b563-cc330b6ae655" width="300" alt="CyberLog App Dashboard">
+  <p><i>The CyberLog Dashboard featuring Daily Tips and Navigation Flow</i></p>
+</div>

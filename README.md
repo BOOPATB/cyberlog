@@ -22,3 +22,6 @@ I learned that modern apps rely on APIs (Application Programming Interfaces) to 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/78349709-0df4-423f-aa3e-6c97e334f57c" width="300" alt="App Screenshot">
 </div>
+
+#session9
+<img width="289" height="643" alt="image" src="https://github.com/user-attachments/assets/c7deede7-0eff-4c04-b563-cc330b6ae655" />

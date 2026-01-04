@@ -3,5 +3,5 @@
     Your browser does not support the video tag.
   </video>
   <br>
-  <b>🛡️ CYBER_LOG: WINTER APP DEMO</b>
+  <b>CYBER_LOG: WINTER APP DEMO</b>
 </p>

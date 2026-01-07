@@ -29,3 +29,22 @@ I learned that modern apps rely on APIs (Application Programming Interfaces) to 
   <img src="https://github.com/user-attachments/assets/c7deede7-0eff-4c04-b563-cc330b6ae655" width="300" alt="CyberLog App Dashboard">
   <p><i>The CyberLog Dashboard featuring Daily Tips and Navigation Flow</i></p>
 </div>
+
+
+#Session 10: Advanced Permissions & Hardware Control
+This session marks the transition from basic UI to interacting with the device's physical hardware. We implemented a robust permission-handling system and an elegant, hardware-integrated SOS feature.
+Multi-Permission Handler
+We integrated the permission_handler package to manage complex Android/iOS requirements.
+
+Camera: Required for torch control and future vision features.
+Storage: Prepared for logging and data persistence.
+Internet: Enabled for real-time cloud sync capabilities.
+
+<div align="center"> <table> <tr> <td align="center"> <b>System Check</b>
+
+<img src="https://github.com/user-attachments/assets/82353fca-ad09-41d8-9a23-119212a3010a" width="200" /> </td> <td align="center"> <b>Permissions UI</b>
+<img src="https://github.com/user-attachments/assets/0e6ad50d-d568-4045-b30a-c50b5ad6072d" width="200" /> </td> <td align="center"> <b>Active SOS Signal</b>
+<img src="https://github.com/user-attachments/assets/a8a61e70-afce-454a-82e1-fb356950e2ff" width="200" /> </td> </tr> </table> </div>
+ Backend Execution (Console Logs)
+<p align="center"> <img src="https://github.com/user-attachments/assets/4abe5b71-90d7-4c40-9340-d0a4f8b37d41" width="80%" />
+<i>Real-time hardware initialization and permission handshake logs.</i> </p>

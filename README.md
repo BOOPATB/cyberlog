@@ -42,9 +42,9 @@ Internet: Enabled for real-time cloud sync capabilities.
 
 <div align="center"> <table> <tr> <td align="center"> <b>System Check</b>
 
-<img src="https://github.com/user-attachments/assets/82353fca-ad09-41d8-9a23-119212a3010a" width="200" /> </td> <td align="center"> <b>Permissions UI</b>
+<img src="https://github.com/user-attachments/assets/82353fca-ad09-41d8-9a23-119212a3010a" width="200" /> </td> <td align="center"> <b>Permissions with active display of active/passive internet </b>
 <img src="https://github.com/user-attachments/assets/0e6ad50d-d568-4045-b30a-c50b5ad6072d" width="200" /> </td> <td align="center"> <b>Active SOS Signal</b>
 <img src="https://github.com/user-attachments/assets/a8a61e70-afce-454a-82e1-fb356950e2ff" width="200" /> </td> </tr> </table> </div>
  Backend Execution (Console Logs)
-<p align="center"> <img src="https://github.com/user-attachments/assets/4abe5b71-90d7-4c40-9340-d0a4f8b37d41" width="80%" />
+<p align="center"> <img src="https://github.com/user-attachments/assets/4abe5b71-90d7-4c40-9340-d0a4f8b37d41" width="200" />
 <i>Real-time hardware initialization and permission handshake logs.</i> </p>

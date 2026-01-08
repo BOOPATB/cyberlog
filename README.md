@@ -49,3 +49,8 @@ Internet: Enabled for real-time  sync capabilities.
 
 <p align="center"> <img src="https://github.com/user-attachments/assets/4abe5b71-90d7-4c40-9340-d0a4f8b37d41" width="200" />
 <i>Snack bar indicating that the app has received permissions</i> </p>
+
+# Session 11: Digital Blackbox & System Diagnostics
+In this session, we transformed the app into a professional diagnostic tool by implementing a Digital Blackbox that logs real-time system events and permission results, with the ability to export these logs to local storage via path_provider. We also added a dedicated Settings Page using device_info_plus to display live hardware data, such as the specific device model and Android version
+
+<div align="center"> <table> <tr> <td align="center"><b>Security Dashboard</b></td> <td align="center"><b>Live Event Logging</b></td> <td align="center"><b>System Diagnostics</b></td> </tr> <tr> <td><img src="https://github.com/user-attachments/assets/f2de6b36-8269-4fdc-be11-67f7c12015ca" width="250"></td> <td><img src="https://github.com/user-attachments/assets/23aa9325-62cc-4d1b-aee7-557aae93989b" width="250"></td> <td><img src="https://github.com/user-attachments/assets/37c71319-f09a-4d2e-a9be-0faf40bee94e" width="250"></td> </tr> </table> </div>

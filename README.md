@@ -58,6 +58,6 @@ In this session, we transformed the app into a professional diagnostic tool by i
 # Session 12: Security Posture & Integrated Audit
 In this session, we expanded the CyberLog ecosystem by implementing a centralized Security Audit Engine. This module evaluates the device's safety by combining real-time permission monitoring with system integrity checks. We also resolved critical UI rendering issues by correcting case-sensitive icon constants and stabilizing the navigation flow between the dashboard and the audit interface.
 
-<div align="center"> <table> <tr> <td align="center"><b>Dashboard Integration</b></td> <td align="center"><b>Security Checklist</b></td> </tr> <tr> <td><img src="https://github.com/user-attachments/assets/b2989511-14ff-4867-8614-73e1b7edf47e" width="350"></td> <td><img src="https://github.com/user-attachments/assets/3a1e427f-65e4-4991-8220-a7224ef67a96" width="350"></td> </tr> </table> </div>
+<div align="center"> <table> <tr> <td align="center"><b>Security Checklist</b></td> <td align="center"><b>Dashboard Integration</b></td> </tr> <tr> <td><img src="https://github.com/user-attachments/assets/b2989511-14ff-4867-8614-73e1b7edf47e" width="350"></td> <td><img src="https://github.com/user-attachments/assets/3a1e427f-65e4-4991-8220-a7224ef67a96" width="350"></td> </tr> </table> </div>
 
   

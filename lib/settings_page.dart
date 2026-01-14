@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // For ensureInitialized
+// For ensureInitialized
 import 'package:device_info_plus/device_info_plus.dart';
 
 class SettingsPage extends StatefulWidget {

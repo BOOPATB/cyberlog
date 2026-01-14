@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577083556500",
+    "project_id": "fulttersession",
+    "storage_bucket": "fulttersession.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577083556500:android:445b2f9c0774ed60fcea81",
+        "android_client_info": {
+          "package_name": "com.example.cyberlog2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAygbc8ObQJzxHWnSQSpGCGOiRDsInvS5U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

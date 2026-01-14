@@ -1,42 +1,149 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:path_provider/path_provider.dart';
-// Ensure this file exists in your lib/ folder
-import 'settings_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'firebase_options.dart';
 
-void main() {
-  // 1. Crucial for Xiaomi/Android stability to prevent engine crashes
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint("Firebase Init Error: $e");
+  }
 
-  runApp(const MaterialApp(
+  final prefs = await SharedPreferences.getInstance();
+  final bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+
+  runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
-    home: ModernPermApp(),
+    theme: ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: const Color(0xFF050A0E),
+      primaryColor: Colors.cyanAccent,
+    ),
+    home: isLoggedIn ? const ModernPermApp() : const LoginScreen(),
   ));
 }
 
-class BlackboxLogger {
-  List<String> logs = [];
+// --- LOGIN SCREEN ---
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
 
-  void addEvent(String event) {
-    final timestamp = DateTime.now().toString().split('.').first;
-    logs.add("[$timestamp] $event");
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isSignUp = false;
+  bool _isLoading = false;
+
+  Future<void> _authenticate() async {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("FIELDS REQUIRED"), backgroundColor: Colors.orange),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      // Login/Signup with a 10-second timeout to prevent infinite loading
+      if (_isSignUp) {
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        ).timeout(const Duration(seconds: 10));
+      } else {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        ).timeout(const Duration(seconds: 10));
+      }
+    } catch (e) {
+      debugPrint("Auth Step Caught: $e");
+    } finally {
+      // SUCCESS CHECK: If the server says we are logged in, move forward
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool('isLoggedIn', true);
+
+        if (mounted) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (context) => const ModernPermApp()));
+        }
+      } else {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("AUTH FAILED: CHECK CONNECTION OR DATABASE"), backgroundColor: Colors.redAccent),
+          );
+        }
+      }
+    }
   }
 
-  Future<String> exportLogs() async {
-    try {
-      // Use getApplicationDocumentsDirectory for better Android 13+ compatibility
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/system_log.txt');
-      String content = logs.join('\n');
-      await file.writeAsString(content);
-      return "Log saved: ${file.path}";
-    } catch (e) {
-      return "Export failed: $e";
-    }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 40),
+          child: Column(
+            children: [
+              const Icon(Icons.shield_outlined, size: 80, color: Colors.cyanAccent),
+              const SizedBox(height: 20),
+              Text(_isSignUp ? "CREATE IDENTITY" : "IDENTITY CHALLENGE",
+                  style: const TextStyle(color: Colors.cyanAccent, letterSpacing: 4, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 40),
+              _buildField(_emailController, "EMAIL_ADDRESS", false),
+              const SizedBox(height: 15),
+              _buildField(_passwordController, "PASSWORD_HASH", true),
+              const SizedBox(height: 30),
+              _isLoading
+                  ? const CircularProgressIndicator(color: Colors.cyanAccent)
+                  : _buildButton(_isSignUp ? "REGISTER" : "LOGIN", _authenticate),
+              TextButton(
+                onPressed: () => setState(() => _isSignUp = !_isSignUp),
+                child: Text(_isSignUp ? "ALREADY REGISTERED? LOG IN" : "NO IDENTITY? SIGN UP",
+                    style: const TextStyle(color: Colors.white24, fontSize: 10)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(TextEditingController controller, String label, bool obscure) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      style: const TextStyle(color: Colors.white, fontFamily: 'monospace'),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.cyanAccent, fontSize: 12),
+        enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.white12)),
+        focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.cyanAccent)),
+      ),
+    );
+  }
+
+  Widget _buildButton(String text, VoidCallback tap) {
+    return InkWell(
+      onTap: tap,
+      child: Container(
+        width: double.infinity, height: 50,
+        decoration: BoxDecoration(border: Border.all(color: Colors.cyanAccent)),
+        child: Center(child: Text(text, style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold))),
+      ),
+    );
   }
 }
 
+// --- DASHBOARD SCREEN ---
 class ModernPermApp extends StatefulWidget {
   const ModernPermApp({super.key});
   @override
@@ -44,194 +151,110 @@ class ModernPermApp extends StatefulWidget {
 }
 
 class _ModernPermAppState extends State<ModernPermApp> {
-  final BlackboxLogger myLogger = BlackboxLogger();
-  bool _isLoading = true;
-  Map<String, bool> _permissionStatus = {};
+  final TextEditingController _noteController = TextEditingController();
+  // Get current user UID for data isolation
+  final String? uid = FirebaseAuth.instance.currentUser?.uid;
 
-  @override
-  void initState() {
-    super.initState();
-    myLogger.addEvent("App initialized");
-    // Small delay ensures the UI is ready before the permission popup appears
-    Future.delayed(Duration.zero, () => _requestAllPermissions());
-  }
-
-  Future<void> _requestAllPermissions() async {
-    myLogger.addEvent("Requesting permissions...");
-    if (mounted) setState(() => _isLoading = true);
-
-    // Requesting Camera and Storage
-    Map<Permission, PermissionStatus> statuses = await [
-      Permission.camera,
-      Permission.storage,
-    ].request();
-
-    if (mounted) {
-      setState(() {
-        _permissionStatus = {
-          'Camera': statuses[Permission.camera]!.isGranted,
-          'Storage': statuses[Permission.storage]!.isGranted,
-        };
-        _isLoading = false;
+  Future<void> _addNote(String content) async {
+    if (uid == null || content.isEmpty) return;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('notes')
+          .add({
+        'content': content,
+        'timestamp': FieldValue.serverTimestamp(),
+        'time_label': DateTime.now().toString().substring(11, 16),
       });
+      _noteController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("SYNC ERROR: $e"), backgroundColor: Colors.red),
+      );
     }
-
-    final isAllGranted = _permissionStatus.values.every((granted) => granted);
-    myLogger.addEvent("Result: ${isAllGranted ? 'Access Granted' : 'Access Denied'}");
-
-    if (isAllGranted) {
-      _showFeedback("All Systems Optimized", Colors.greenAccent);
-    } else {
-      _showFeedback("Permissions Required", Colors.orangeAccent);
-    }
-  }
-
-  void _showFeedback(String msg, Color color) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: color,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _goToSettings() {
-    myLogger.addEvent("Navigating to Settings");
-    // Direct navigation is safer than named routes to avoid black screens
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const SettingsPage()),
-    );
-  }
-
-  Future<void> _exportLogs() async {
-    myLogger.addEvent("Exporting data...");
-    String result = await myLogger.exportLogs();
-    _showFeedback(result, Colors.blue);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: _isLoading
-              ? const CircularProgressIndicator(color: Colors.white)
-              : SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _buildHeaderIcon(),
-                const SizedBox(height: 30),
-                const Text("SYSTEM SECURITY",
-                    style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w300, letterSpacing: 4)),
-                const SizedBox(height: 40),
-
-                // Status Display
-                ..._permissionStatus.entries.map((entry) => _buildStatusTile(entry.key, entry.value)),
-
-                const SizedBox(height: 30),
-                _buildLogTerminal(),
-                const SizedBox(height: 20),
-
-                // Actions
-                _buildButton("RETRY PERMISSIONS", Colors.blueAccent, _requestAllPermissions),
-                const SizedBox(height: 15),
-                _buildButton("EXPORT LOGS", Colors.greenAccent, _exportLogs),
-                const SizedBox(height: 15),
-                if (_permissionStatus.values.every((v) => v))
-                  _buildButton("OPEN DEVICE SETTINGS", Colors.purpleAccent, _goToSettings),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderIcon() {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [BoxShadow(color: Colors.blue.withOpacity(0.3), blurRadius: 40, spreadRadius: 5)],
-      ),
-      child: const Icon(Icons.shield_outlined, size: 100, color: Colors.white),
-    );
-  }
-
-  Widget _buildStatusTile(String label, bool isGranted) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 40),
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: isGranted ? Colors.greenAccent.withOpacity(0.5) : Colors.redAccent.withOpacity(0.5)),
-      ),
-      child: Row(
-        children: [
-          Icon(isGranted ? Icons.check_circle : Icons.cancel, color: isGranted ? Colors.greenAccent : Colors.redAccent, size: 20),
-          const SizedBox(width: 15),
-          Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w400)),
-          const Spacer(),
-          Text(isGranted ? "ACTIVE" : "OFFLINE", style: TextStyle(color: isGranted ? Colors.greenAccent : Colors.redAccent, fontSize: 10)),
+      appBar: AppBar(
+        title: const Text("CYBER_LOG: SYNC_READY", style: TextStyle(color: Colors.greenAccent, fontSize: 12, fontFamily: 'monospace')),
+        backgroundColor: Colors.transparent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.power_settings_new, color: Colors.redAccent),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('isLoggedIn', false);
+              await FirebaseAuth.instance.signOut();
+              if (mounted) Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const LoginScreen()));
+            },
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildLogTerminal() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 25, bottom: 8),
-          child: Text("SYSTEM_LOGS_V1.0", style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold)),
-        ),
-        Container(
-          height: 120,
-          width: double.infinity,
-          margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.white10),
-          ),
-          child: SingleChildScrollView(
-            reverse: true,
-            child: Text(
-              myLogger.logs.isEmpty ? "> Initializing..." : myLogger.logs.join('\n'),
-              style: const TextStyle(color: Colors.greenAccent, fontFamily: 'monospace', fontSize: 11),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            TextField(
+              controller: _noteController,
+              decoration: const InputDecoration(
+                hintText: "> ENTRY_DATA...",
+                suffixIcon: Icon(Icons.cloud_upload, color: Colors.cyanAccent),
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: _addNote,
             ),
-          ),
-        ),
-      ],
-    );
-  }
+            const SizedBox(height: 20),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(uid)
+                    .collection('notes')
+                    .orderBy('timestamp', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  // Handle Error States (Permissions/Network)
+                  if (snapshot.hasError) {
+                    return Center(child: Text("ERROR: CHECK FIRESTORE RULES", style: const TextStyle(color: Colors.redAccent)));
+                  }
 
-  Widget _buildButton(String text, Color color, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: SizedBox(
-        width: 250,
-        child: OutlinedButton(
-          onPressed: onTap,
-          style: OutlinedButton.styleFrom(
-            side: BorderSide(color: color.withOpacity(0.5)),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(vertical: 15),
-          ),
-          child: Text(text, style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                  // Handle Loading State
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator(color: Colors.cyanAccent));
+                  }
+
+                  // Handle Empty State
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text("NO DATA FOUND IN CLOUD", style: TextStyle(color: Colors.white24)));
+                  }
+
+                  return ListView.builder(
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      var doc = snapshot.data!.docs[index];
+                      var data = doc.data() as Map<String, dynamic>;
+
+                      return Card(
+                        color: Colors.white.withOpacity(0.05),
+                        child: ListTile(
+                          title: Text(data['content'] ?? "EMPTY", style: const TextStyle(color: Colors.white)),
+                          subtitle: Text("ID: ${doc.id.substring(0, 5)}... | ${data['time_label'] ?? ''}",
+                              style: const TextStyle(color: Colors.white24, fontSize: 10)),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_sweep, color: Colors.redAccent, size: 18),
+                            onPressed: () => doc.reference.delete(),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

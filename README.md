@@ -11,3 +11,4 @@
 4. Create and run a sample app: It shows a simple “If Lost, Contact” screen using `MaterialApp`, `Scaffold`, `AppBar`, and a centered `Text` widget.
 # the screenshots have been uploaded in a seperate folder for future use and updation
 #updating status
+checking for update
